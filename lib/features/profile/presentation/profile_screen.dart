@@ -164,28 +164,58 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 32),
                     // Action Button (slate-100 style)
-                    SizedBox(
-                      width: double.infinity,
-                      child: isOwnProfile
-                          ? TextButton(
-                              onPressed: () => context.go('/profile/edit'),
-                              style: TextButton.styleFrom(
-                                backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                                foregroundColor: theme.colorScheme.onSurface,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: const Text('프로필 편집'),
-                            )
-                          : _FollowButton(
-                              isFollowing: isFollowing,
-                              followerId: currentUser!.id,
-                              followingId: profile.id,
-                              username: username,
+                    if (isOwnProfile) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () => context.go('/profile/edit'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                            foregroundColor: theme.colorScheme.onSurface,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                    ),
+                          ),
+                          child: const Text('프로필 편집'),
+                        ),
+                      ),
+                      if (data.profile.isAdmin) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton.icon(
+                            onPressed: () => context.go('/admin'),
+                            icon: Icon(
+                              Icons.admin_panel_settings_outlined,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                            label: Text(
+                              '관리자 대시보드',
+                              style: TextStyle(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                    if (!isOwnProfile)
+                      SizedBox(
+                        width: double.infinity,
+                        child: _FollowButton(
+                          isFollowing: isFollowing,
+                          followerId: currentUser!.id,
+                          followingId: profile.id,
+                          username: username,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

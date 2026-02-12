@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:insta_clone/config/app_url.dart';
 import 'package:insta_clone/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 
@@ -52,7 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
             child: Container(
@@ -141,6 +142,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: const Text('회원가입'),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 20),
+                    Divider(
+                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Column(
+                        children: [
+                          TextButton.icon(
+                            onPressed: () => context.go('/admin/login'),
+                            icon: Icon(
+                              Icons.admin_panel_settings_outlined,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            label: Text(
+                              '관리자 로그인',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.primary,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SelectableText(
+                            adminLoginFullUrl,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.outline,
+                                  fontSize: 11,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

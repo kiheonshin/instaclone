@@ -28,8 +28,18 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         foregroundColor: theme.colorScheme.onPrimary,
         actions: [
+          TextButton.icon(
+            onPressed: () => context.go('/'),
+            icon: Icon(Icons.home_outlined, size: 20, color: theme.colorScheme.onPrimary),
+            label: Text(
+              '메인으로',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 8),
             child: Center(
               child: Text(
                 profile?.username ?? '',

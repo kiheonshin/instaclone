@@ -47,10 +47,13 @@ class _BottomNavBar extends ConsumerWidget {
 
   final String location;
 
-  int _getSelectedIndex() {
+  int _getSelectedIndex(WidgetRef ref) {
+    final profile = ref.watch(currentProfileProvider).valueOrNull;
+    final hasAdmin = profile?.isAdmin == true;
     if (location == '/') return 0;
     if (location.startsWith('/search')) return 1;
     if (location.startsWith('/create')) return 2;
+    if (location.startsWith('/admin')) return hasAdmin ? 4 : 3;
     if (location.startsWith('/profile')) return 3;
     return 0;
   }
@@ -59,6 +62,7 @@ class _BottomNavBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(currentProfileProvider).valueOrNull;
     final theme = Theme.of(context);
+    final hasAdmin = profile?.isAdmin == true;
     return Container(
       decoration: BoxDecoration(
         color: theme.bottomNavigationBarTheme.backgroundColor,
@@ -71,12 +75,18 @@ class _BottomNavBar extends ConsumerWidget {
       ),
       child: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: _getSelectedIndex(),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), activeIcon: Icon(Icons.add_box), label: '만들기'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: '프로필'),
+        currentIndex: _getSelectedIndex(ref),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: '홈'),
+          const BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
+          const BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), activeIcon: Icon(Icons.add_box), label: '만들기'),
+          const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: '프로필'),
+          if (hasAdmin)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings_outlined),
+              activeIcon: Icon(Icons.admin_panel_settings),
+              label: '관리자',
+            ),
         ],
         onTap: (index) {
           switch (index) {
@@ -91,6 +101,9 @@ class _BottomNavBar extends ConsumerWidget {
               break;
             case 3:
               if (profile != null) context.go('/profile/${profile.username}');
+              break;
+            case 4:
+              if (hasAdmin) context.go('/admin');
               break;
           }
         },
@@ -137,6 +150,15 @@ class _NavSidebar extends ConsumerWidget {
             isActive: location.startsWith('/create'),
             onTap: () => context.go('/create'),
           ),
+          if (profile?.isAdmin == true) ...[
+            _NavItem(
+              icon: Icons.admin_panel_settings_outlined,
+              activeIcon: Icons.admin_panel_settings,
+              label: '관리자',
+              isActive: location.startsWith('/admin'),
+              onTap: () => context.go('/admin'),
+            ),
+          ],
           const Spacer(),
           _NavItem(
             icon: Icons.person_outline,

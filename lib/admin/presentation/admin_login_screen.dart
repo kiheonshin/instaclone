@@ -257,7 +257,19 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                                     ],
                                   ),
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 24),
+                          Center(
+                            child: TextButton(
+                              onPressed: () => context.go('/login'),
+                              child: Text(
+                                '← 일반 로그인으로 돌아가기',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.outline,
+                                    ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
                           Divider(color: theme.dividerColor),
                           const SizedBox(height: 24),
                           Text(
