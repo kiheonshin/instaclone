@@ -61,7 +61,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             child: Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: AppTheme.lightCardBg,
+                color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(

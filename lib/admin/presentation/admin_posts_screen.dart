@@ -27,8 +27,8 @@ class AdminPostsScreen extends ConsumerWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
-              color: theme.colorScheme.surface.withValues(alpha: 0.8),
               decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.8),
                 border: Border(
                   bottom: BorderSide(
                     color: theme.dividerColor.withValues(alpha: 0.5),
