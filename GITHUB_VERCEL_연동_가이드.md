@@ -45,9 +45,8 @@ git push -u origin main
 5. **프로젝트 설정 화면**에서:
    - **Framework Preset**: `Other`
    - **Root Directory**: `./` (그대로)
-   - **Build Command**: `echo "Skip"` (GitHub Actions에서 빌드하므로 Vercel 빌드는 건너뜀)
-   - **Output Directory**: `build/web`
-6. **Deploy** 클릭 → 첫 배포는 실패할 수 있으며, 이는 정상입니다. 프로젝트가 생성되면 4단계로 진행합니다.
+   - **Build / Output 설정**: `vercel.json`에 이미 정의되어 있으므로 **Override** 체크 해제 후 기본값 사용
+6. **Deploy** 클릭 → Flutter 빌드에 5~10분 정도 소요될 수 있습니다.
 
 ---
 
