@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,17 +20,36 @@ class AdminPostsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('게시물 관리'),
         centerTitle: true,
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: theme.colorScheme.onSurface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () => context.go('/admin'),
-          style: IconButton.styleFrom(
-            foregroundColor: theme.colorScheme.primary,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              color: theme.colorScheme.surface.withValues(alpha: 0.8),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.dividerColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-        leadingWidth: 72,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: TextButton.icon(
+            onPressed: () => context.go('/admin'),
+            icon: const Icon(Icons.chevron_left, size: 24),
+            label: const Text('뒤로', style: TextStyle(fontSize: 18)),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        leadingWidth: 80,
       ),
       body: postsAsync.when(
         data: (posts) {

@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:insta_clone/theme/app_theme.dart';
+
+/// 캡션 텍스트에서 해시태그를 primary 색상으로 파싱 (HTML 디자인 반영)
+List<TextSpan> _buildCaptionSpans(String caption, ThemeData theme) {
+  final spans = <TextSpan>[];
+  final regex = RegExp(r'(#\w+)');
+  var lastEnd = 0;
+  for (final match in regex.allMatches(caption)) {
+    if (match.start > lastEnd) {
+      spans.add(TextSpan(text: caption.substring(lastEnd, match.start)));
+    }
+    spans.add(TextSpan(
+      text: match.group(0),
+      style: TextStyle(color: theme.colorScheme.primary),
+    ));
+    lastEnd = match.end;
+  }
+  if (lastEnd < caption.length) {
+    spans.add(TextSpan(text: caption.substring(lastEnd)));
+  }
+  return spans.isEmpty ? [TextSpan(text: caption)] : spans;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -205,7 +225,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                   text: '${post.author?.username ?? ''} ',
                                   style: const TextStyle(fontWeight: FontWeight.w600),
                                 ),
-                                TextSpan(text: post.caption),
+                                ..._buildCaptionSpans(post.caption!, theme),
                               ],
                             ),
                           ),

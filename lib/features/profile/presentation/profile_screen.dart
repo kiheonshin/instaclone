@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,10 +30,55 @@ class ProfileScreen extends ConsumerWidget {
         final isOwnProfile = currentUser?.id == profile.id;
 
         final theme = Theme.of(context);
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              // Profile Header (centered - HTML design)
+        return Column(
+          children: [
+            // Profile Nav Bar (HTML 디자인: username + 메뉴)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.8),
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.dividerColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 40),
+                      Expanded(
+                        child: Text(
+                          profile.username,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // TODO: 메뉴 표시
+                        },
+                        icon: const Icon(Icons.menu),
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(40, 40),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Profile Header (centered - HTML design)
               Padding(
                 padding: const EdgeInsets.only(top: 32, bottom: 24, left: 24, right: 24),
                 child: Column(
@@ -242,8 +289,11 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 error: (e, _) => Text('로드 실패: $e'),
               ),
-            ],
-          ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),

@@ -21,9 +21,9 @@ class AppTheme {
   static const Color lightSecondaryText = Color(0xFF8E8E8E);
   static const Color lightBorder = Color(0xFFDBDBDB);
 
-  // 다크 테마 컬러
-  static const Color darkBg = Color(0xFF000000);
-  static const Color darkCardBg = Color(0xFF121212);
+  // 다크 테마 컬러 (HTML 디자인: background-dark #101922)
+  static const Color darkBg = Color(0xFF101922);
+  static const Color darkCardBg = Color(0xFF1A242D);
   static const Color darkPrimaryText = Color(0xFFF5F5F5);
   static const Color darkSecondaryText = Color(0xFFA8A8A8);
   static const Color darkBorder = Color(0xFF262626);
@@ -35,7 +35,7 @@ class AppTheme {
       colorScheme: ColorScheme.light(
         surface: lightBg,
         onSurface: lightPrimaryText,
-        primary: instagramBlue,
+        primary: stitchBlue,
         onPrimary: Colors.white,
         secondary: instagramPurple,
         outline: lightBorder,
@@ -76,7 +76,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: instagramBlue,
+          backgroundColor: stitchBlue,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
@@ -86,7 +86,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: instagramBlue,
+          backgroundColor: stitchBlue,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
@@ -105,7 +105,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: instagramBlue,
+          foregroundColor: stitchBlue,
         ),
       ),
       fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
@@ -153,7 +153,7 @@ class AppTheme {
       colorScheme: ColorScheme.dark(
         surface: darkBg,
         onSurface: darkPrimaryText,
-        primary: instagramBlue,
+        primary: stitchBlue,
         onPrimary: Colors.white,
         secondary: instagramPurple,
         outline: darkBorder,
@@ -194,7 +194,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: instagramBlue,
+          backgroundColor: stitchBlue,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
@@ -204,7 +204,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: instagramBlue,
+          backgroundColor: stitchBlue,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
@@ -223,7 +223,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: instagramBlue,
+          foregroundColor: stitchBlue,
         ),
       ),
       fontFamily: GoogleFonts.plusJakartaSans().fontFamily,

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:dotted_border/dotted_border.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../feed/providers/feed_provider.dart';
 
@@ -132,29 +133,30 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Image Selection Area (dashed border, rounded-xl)
+                  // Image Selection Area (dashed border, rounded-xl - HTML 디자인)
                   GestureDetector(
                     onTap: _pickImage,
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                            width: 2,
-                            strokeAlign: BorderSide.strokeAlignInside,
+                      child: DottedBorder(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                        strokeWidth: 2,
+                        dashPattern: const [8, 6],
+                        borderType: BorderType.RRect,
+                        radius: const Radius.circular(12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: _imageBytes != null
+                          child: _imageBytes != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
                                 child: Image.memory(
@@ -197,6 +199,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                                   ),
                                 ],
                               ),
+                        ),
                       ),
                     ),
                   ),
