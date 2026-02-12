@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:insta_clone/theme/app_theme.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../feed/providers/feed_provider.dart';
+import '../providers/post_provider.dart';
 
 /// 캡션 텍스트에서 해시태그를 primary 색상으로 파싱 (HTML 디자인 반영)
 List<TextSpan> _buildCaptionSpans(String caption, ThemeData theme) {
@@ -20,13 +27,7 @@ List<TextSpan> _buildCaptionSpans(String caption, ThemeData theme) {
     spans.add(TextSpan(text: caption.substring(lastEnd)));
   }
   return spans.isEmpty ? [TextSpan(text: caption)] : spans;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import '../../auth/providers/auth_provider.dart';
-import '../../feed/providers/feed_provider.dart';
-import '../providers/post_provider.dart';
+}
 
 class PostDetailScreen extends ConsumerStatefulWidget {
   const PostDetailScreen({super.key, required this.postId});

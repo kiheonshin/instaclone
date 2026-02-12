@@ -215,7 +215,6 @@ class ProfileScreen extends ConsumerWidget {
                           username: username,
                         ),
                       ),
-                    ],
                   ],
                 ),
               ),
