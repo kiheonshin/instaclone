@@ -1,0 +1,39 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Link Vercel project
+        run: |
+          mkdir -p build/web/.vercel
+          printf '%s\n' '{"orgId":"${{ secrets.VERCEL_ORG_ID }}","projectId":"${{ secrets.VERCEL_PROJECT_ID }}"}' > build/web/.vercel/project.json
+
+      - name: Deploy to Vercel
+        run: |
+          cd build/web
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes

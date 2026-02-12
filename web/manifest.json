@@ -1,0 +1,9 @@
+{
+    "name": "Insta Clone",
+    "short_name": "Insta Clone",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "Instagram Clone - Share your moments"
+}

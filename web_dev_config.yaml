@@ -1,0 +1,5 @@
+# Flutter Web 개발 서버 설정 (Flutter 3.38+)
+# 포트 8081 사용 (8080 충돌 시)
+server:
+  host: "0.0.0.0"
+  port: 8081
