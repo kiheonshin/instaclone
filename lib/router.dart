@@ -52,16 +52,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // ─── 관리자 라우트 (MainLayout 밖) ───
       GoRoute(
         path: '/admin',
+        builder: (context, state) => const AdminDashboardScreen(),
         routes: [
           GoRoute(
             path: 'login',
             builder: (context, state) => const AdminLoginScreen(),
-          ),
-          GoRoute(
-            path: '',
-            builder: (context, state) => const AdminDashboardScreen(),
           ),
           GoRoute(
             path: 'users',
@@ -73,6 +71,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // ─── 인증 라우트 (MainLayout 밖) ───
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
@@ -81,6 +80,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
       ),
+      // ─── 게시물 작성 (풀스크린, MainLayout 밖) ───
+      GoRoute(
+        path: '/create',
+        builder: (context, state) => const CreatePostScreen(),
+      ),
+      // ─── 게시물 상세 (풀스크린, MainLayout 밖) ───
+      GoRoute(
+        path: '/post/:id',
+        builder: (context, state) => PostDetailScreen(
+          postId: state.pathParameters['id']!,
+        ),
+      ),
+      // ─── 메인 레이아웃 라우트 ───
       ShellRoute(
         builder: (context, state, child) => MainLayout(
           location: state.matchedLocation,
@@ -90,16 +102,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/',
             builder: (context, state) => const HomeScreen(),
-          ),
-          GoRoute(
-            path: '/create',
-            builder: (context, state) => const CreatePostScreen(),
-          ),
-          GoRoute(
-            path: '/post/:id',
-            builder: (context, state) => PostDetailScreen(
-              postId: state.pathParameters['id']!,
-            ),
           ),
           GoRoute(
             path: '/profile/:username',
