@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:insta_clone/analytics/tracker_bridge.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dotted_border/dotted_border.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -60,14 +61,19 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     });
 
     try {
-      final path = '${user.id}/${DateTime.now().millisecondsSinceEpoch}_$_imagePath';
-      await Supabase.instance.client.storage.from('posts').uploadBinary(
+      final path =
+          '${user.id}/${DateTime.now().millisecondsSinceEpoch}_$_imagePath';
+      await Supabase.instance.client.storage
+          .from('posts')
+          .uploadBinary(
             path,
             _imageBytes!,
             fileOptions: const FileOptions(upsert: true),
           );
 
-      await ref.read(postRepositoryProvider).createPost(
+      await ref
+          .read(postRepositoryProvider)
+          .createPost(
             userId: user.id,
             imagePath: path,
             caption: _captionController.text.trim().isEmpty
@@ -157,48 +163,53 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             ],
                           ),
                           child: _imageBytes != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.memory(
-                                  _imageBytes!,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.memory(
+                                    _imageBytes!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 64,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primary
+                                            .withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.add_photo_alternate_outlined,
+                                        size: 32,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      '사진을 선택하세요',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '최대 10장까지 선택 가능합니다',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                    ),
+                                  ],
                                 ),
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 64,
-                                    height: 64,
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.add_photo_alternate_outlined,
-                                      size: 32,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    '사진을 선택하세요',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '최대 10장까지 선택 가능합니다',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.outline,
-                                    ),
-                                  ),
-                                ],
-                              ),
                         ),
                       ),
                     ),
@@ -234,7 +245,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                             ),
                           ),
                         ),
-                        Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.5)),
+                        Divider(
+                          height: 1,
+                          color: theme.dividerColor.withValues(alpha: 0.5),
+                        ),
                         ListTile(
                           leading: Icon(
                             Icons.person_add_alt_outlined,
@@ -250,10 +264,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           trailing: Icon(
                             Icons.chevron_right,
                             size: 20,
-                            color: theme.colorScheme.outline.withValues(alpha: 0.7),
+                            color: theme.colorScheme.outline.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
-                        Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.5)),
+                        Divider(
+                          height: 1,
+                          color: theme.dividerColor.withValues(alpha: 0.5),
+                        ),
                         ListTile(
                           leading: Icon(
                             Icons.location_on_outlined,
@@ -269,7 +288,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           trailing: Icon(
                             Icons.chevron_right,
                             size: 20,
-                            color: theme.colorScheme.outline.withValues(alpha: 0.7),
+                            color: theme.colorScheme.outline.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
                       ],
@@ -302,12 +323,18 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+                        color: theme.colorScheme.errorContainer.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
+                          Icon(
+                            Icons.error_outline,
+                            color: theme.colorScheme.error,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -341,14 +368,21 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: _isLoading ? null : _uploadAndCreate,
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          AnalyticsTrackerBridge.trackCta('post_create_submit');
+                          _uploadAndCreate();
+                        },
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 2,
-                    shadowColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+                    shadowColor: theme.colorScheme.primary.withValues(
+                      alpha: 0.3,
+                    ),
                   ),
                   child: _isLoading
                       ? SizedBox(

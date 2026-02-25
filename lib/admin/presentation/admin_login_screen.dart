@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:insta_clone/analytics/tracker_bridge.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
@@ -35,13 +36,17 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final response = await ref.read(authRepositoryProvider).signIn(
+      final response = await ref
+          .read(authRepositoryProvider)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
       final user = response.user;
       if (user != null && mounted) {
-        final profile = await ref.read(authRepositoryProvider).getProfile(user.id);
+        final profile = await ref
+            .read(authRepositoryProvider)
+            .getProfile(user.id);
         if (mounted) {
           if (profile?.isAdmin == true) {
             ref.invalidate(currentProfileProvider);
@@ -59,9 +64,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('로그인 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -114,7 +119,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                               width: 64,
                               height: 64,
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -161,11 +168,17 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                                 color: theme.colorScheme.outline,
                               ),
                               filled: true,
-                              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                              fillColor: theme
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) return '이메일을 입력하세요';
@@ -195,19 +208,29 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
                                   size: 20,
                                 ),
                                 onPressed: () {
-                                  setState(() => _obscurePassword = !_obscurePassword);
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
                                 },
                               ),
                               filled: true,
-                              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                              fillColor: theme
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) return '비밀번호를 입력하세요';
@@ -230,14 +253,23 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                           ),
                           const SizedBox(height: 8),
                           FilledButton(
-                            onPressed: _isLoading ? null : _login,
+                            onPressed: _isLoading
+                                ? null
+                                : () {
+                                    AnalyticsTrackerBridge.trackCta(
+                                      'admin_login_submit',
+                                    );
+                                    _login();
+                                  },
                             style: FilledButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               elevation: 2,
-                              shadowColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+                              shadowColor: theme.colorScheme.primary.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                             child: _isLoading
                                 ? SizedBox(
@@ -253,7 +285,11 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                                     children: [
                                       const Text('관리자 로그인'),
                                       const SizedBox(width: 8),
-                                      Icon(Icons.login, size: 20, color: theme.colorScheme.onPrimary),
+                                      Icon(
+                                        Icons.login,
+                                        size: 20,
+                                        color: theme.colorScheme.onPrimary,
+                                      ),
                                     ],
                                   ),
                           ),
@@ -264,8 +300,8 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                               child: Text(
                                 '← 일반 로그인으로 돌아가기',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.outline,
-                                    ),
+                                  color: theme.colorScheme.outline,
+                                ),
                               ),
                             ),
                           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:insta_clone/analytics/tracker_bridge.dart';
+
 import '../../features/auth/providers/auth_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -17,10 +19,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                theme.colorScheme.primary,
-                theme.colorScheme.secondary,
-              ],
+              colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -30,12 +29,16 @@ class AdminDashboardScreen extends ConsumerWidget {
         actions: [
           TextButton.icon(
             onPressed: () => context.go('/'),
-            icon: Icon(Icons.home_outlined, size: 20, color: theme.colorScheme.onPrimary),
+            icon: Icon(
+              Icons.home_outlined,
+              size: 20,
+              color: theme.colorScheme.onPrimary,
+            ),
             label: Text(
               '메인으로',
               style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
+                color: theme.colorScheme.onPrimary,
+              ),
             ),
           ),
           Padding(
@@ -44,8 +47,8 @@ class AdminDashboardScreen extends ConsumerWidget {
               child: Text(
                 profile?.username ?? '',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                    ),
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
             ),
           ),
@@ -53,7 +56,9 @@ class AdminDashboardScreen extends ConsumerWidget {
             icon: Icon(Icons.logout, color: theme.colorScheme.onPrimary),
             onPressed: () async {
               await ref.read(authRepositoryProvider).signOut();
-              if (context.mounted) context.go('/admin/login');
+              if (context.mounted) {
+                context.go('/admin/login');
+              }
             },
           ),
         ],
@@ -69,14 +74,29 @@ class AdminDashboardScreen extends ConsumerWidget {
             _AdminCard(
               icon: Icons.people,
               title: '사용자 관리',
-              subtitle: '전체 사용자 조회 및 관리',
-              onTap: () => context.go('/admin/users'),
+              subtitle: '전체 사용자 조회 및 권한 관리',
+              onTap: () {
+                AnalyticsTrackerBridge.trackCta('admin_go_users');
+                context.go('/admin/users');
+              },
             ),
             _AdminCard(
               icon: Icons.photo_library,
               title: '게시물 관리',
               subtitle: '전체 게시물 조회 및 삭제',
-              onTap: () => context.go('/admin/posts'),
+              onTap: () {
+                AnalyticsTrackerBridge.trackCta('admin_go_posts');
+                context.go('/admin/posts');
+              },
+            ),
+            _AdminCard(
+              icon: Icons.insights_outlined,
+              title: 'Heatmap Analytics',
+              subtitle: '클릭/스크롤/세션 리플레이',
+              onTap: () {
+                AnalyticsTrackerBridge.trackCta('admin_go_heatmap');
+                context.go('/admin/heatmap');
+              },
             ),
           ],
         ),
@@ -116,15 +136,15 @@ class _AdminCard extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 subtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
+                  color: theme.colorScheme.outline,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],

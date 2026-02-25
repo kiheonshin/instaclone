@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -15,6 +14,7 @@ import 'admin/presentation/admin_login_screen.dart';
 import 'admin/presentation/admin_dashboard_screen.dart';
 import 'admin/presentation/admin_users_screen.dart';
 import 'admin/presentation/admin_posts_screen.dart';
+import 'admin/presentation/admin_heatmap_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -69,13 +69,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'posts',
             builder: (context, state) => const AdminPostsScreen(),
           ),
+          GoRoute(
+            path: 'heatmap',
+            builder: (context, state) => const AdminHeatmapScreen(),
+          ),
         ],
       ),
       // ─── 인증 라우트 (MainLayout 밖) ───
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
@@ -88,26 +89,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ─── 게시물 상세 (풀스크린, MainLayout 밖) ───
       GoRoute(
         path: '/post/:id',
-        builder: (context, state) => PostDetailScreen(
-          postId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            PostDetailScreen(postId: state.pathParameters['id']!),
       ),
       // ─── 메인 레이아웃 라우트 ───
       ShellRoute(
-        builder: (context, state, child) => MainLayout(
-          location: state.matchedLocation,
-          child: child,
-        ),
+        builder: (context, state, child) =>
+            MainLayout(location: state.matchedLocation, child: child),
         routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const HomeScreen(),
-          ),
+          GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
           GoRoute(
             path: '/profile/:username',
-            builder: (context, state) => ProfileScreen(
-              username: state.pathParameters['username']!,
-            ),
+            builder: (context, state) =>
+                ProfileScreen(username: state.pathParameters['username']!),
           ),
           GoRoute(
             path: '/profile/edit',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:insta_clone/analytics/tracker_bridge.dart';
 import 'package:insta_clone/config/app_url.dart';
 import 'package:insta_clone/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
@@ -31,16 +32,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authRepositoryProvider).signIn(
+      await ref
+          .read(authRepositoryProvider)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
       if (mounted) context.go('/');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('로그인 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -59,7 +62,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
+                color:
+                    Theme.of(context).cardTheme.color ??
+                    Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -106,7 +111,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 : Icons.visibility,
                           ),
                           onPressed: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
                           },
                         ),
                       ),
@@ -117,7 +124,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     FilledButton(
-                      onPressed: _isLoading ? null : _login,
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              AnalyticsTrackerBridge.trackCta(
+                                'auth_login_submit',
+                              );
+                              _login();
+                            },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -145,14 +159,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     Divider(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     Center(
                       child: Column(
                         children: [
                           TextButton.icon(
-                            onPressed: () => context.go('/admin/login'),
+                            onPressed: () {
+                              AnalyticsTrackerBridge.trackCta(
+                                'auth_go_admin_login',
+                              );
+                              context.go('/admin/login');
+                            },
                             icon: Icon(
                               Icons.admin_panel_settings_outlined,
                               size: 20,
@@ -160,20 +181,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             label: Text(
                               '관리자 로그인',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
                             style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.primary,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
                           SelectableText(
                             adminLoginFullUrl,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
                                   color: Theme.of(context).colorScheme.outline,
                                   fontSize: 11,
                                 ),

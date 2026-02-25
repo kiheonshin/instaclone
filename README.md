@@ -121,3 +121,31 @@ lib/
 ## 라이선스
 
 MIT
+
+## Analytics (Heatmap / Scroll / Replay)
+
+This project now includes web behavior analytics.
+
+- Automatic event tracking on all pages
+  - click coordinates + element metadata
+  - scroll depth milestones (25/50/75/100)
+  - CTA tracking
+  - rage click / dead click detection
+  - page dwell time
+- Admin analytics page: `/admin/heatmap`
+
+### Setup
+
+Apply Supabase migration:
+
+```powershell
+$env:SUPABASE_ACCESS_TOKEN="YOUR_ACCESS_TOKEN"
+$env:SUPABASE_DB_PASSWORD="YOUR_DB_PASSWORD"
+.\apply_analytics_migration.ps1
+```
+
+Run app:
+
+```powershell
+flutter run -d chrome
+```
