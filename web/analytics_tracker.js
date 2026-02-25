@@ -42,10 +42,13 @@
   let lastRageEmitAt = 0;
   let lastRageSignature = "";
 
-  function initFromDart(initConfig) {
-    if (initConfig && typeof initConfig === "object") {
-      config.supabaseUrl = String(initConfig.supabaseUrl || "");
-      config.supabaseAnonKey = String(initConfig.supabaseAnonKey || "");
+  function initFromDart(initConfigOrUrl, maybeAnonKey) {
+    if (typeof initConfigOrUrl === "string") {
+      config.supabaseUrl = String(initConfigOrUrl || "");
+      config.supabaseAnonKey = String(maybeAnonKey || "");
+    } else if (initConfigOrUrl && typeof initConfigOrUrl === "object") {
+      config.supabaseUrl = String(initConfigOrUrl.supabaseUrl || "");
+      config.supabaseAnonKey = String(initConfigOrUrl.supabaseAnonKey || "");
     }
     start();
     void flushQueue();
@@ -71,6 +74,9 @@
 
   window.analyticsTrackerInit = initFromDart;
   window.analyticsTrackCta = trackCtaFromFlutter;
+  if (window.__instacloneAnalyticsInitConfig) {
+    initFromDart(window.__instacloneAnalyticsInitConfig);
+  }
 
   function start() {
     if (isReady) {
@@ -632,7 +638,21 @@
   }
 
   function normalizeObject(value) {
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
+    if (!value) {
+      return {};
+    }
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (_error) {
+        return {};
+      }
+      return {};
+    }
+    if (typeof value !== "object" || Array.isArray(value)) {
       return {};
     }
     return value;
