@@ -6,6 +6,7 @@ import 'presentation/admin_dashboard_screen.dart';
 import 'presentation/admin_users_screen.dart';
 import 'presentation/admin_posts_screen.dart';
 import 'presentation/admin_heatmap_screen.dart';
+import 'presentation/admin_analytics_screen.dart';
 
 final adminRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -55,6 +56,10 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'heatmap',
             builder: (context, state) => const AdminHeatmapScreen(),
+          ),
+          GoRoute(
+            path: 'analytics',
+            builder: (context, state) => const AdminAnalyticsScreen(),
           ),
         ],
       ),

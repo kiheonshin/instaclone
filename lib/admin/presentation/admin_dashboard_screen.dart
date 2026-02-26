@@ -98,6 +98,15 @@ class AdminDashboardScreen extends ConsumerWidget {
                 context.go('/admin/heatmap');
               },
             ),
+            _AdminCard(
+              icon: Icons.analytics_outlined,
+              title: '방문자 분석',
+              subtitle: '트래픽/유입경로/디바이스/체류시간',
+              onTap: () {
+                AnalyticsTrackerBridge.trackCta('admin_go_analytics');
+                context.go('/admin/analytics');
+              },
+            ),
           ],
         ),
       ),

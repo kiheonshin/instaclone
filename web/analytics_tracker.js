@@ -42,6 +42,12 @@
   let lastRageEmitAt = 0;
   let lastRageSignature = "";
 
+  // ── Page Views tracking (separate table) ──
+  let pageViewsQueue = [];
+  let pageViewsFlushInFlight = false;
+  let currentPageEntryUtm = {};
+  let currentPageReferrer = "";
+
   function initFromDart(initConfigOrUrl, maybeAnonKey) {
     if (typeof initConfigOrUrl === "string") {
       config.supabaseUrl = String(initConfigOrUrl || "");
@@ -84,6 +90,7 @@
     }
     isReady = true;
     loadOrCreateSession();
+    capturePageEntry();
     installListeners();
     enqueueEvent(
       buildEvent("page_view", {
@@ -97,6 +104,7 @@
     if (!flushTimer) {
       flushTimer = window.setInterval(() => {
         void flushQueue();
+        void flushPageViews();
       }, FLUSH_INTERVAL_MS);
     }
   }
@@ -132,15 +140,20 @@
     window.addEventListener("popstate", () => handleRouteChange("popstate"));
     window.addEventListener("hashchange", () => handleRouteChange("hashchange"));
     window.addEventListener("beforeunload", () => {
+      emitPageView("unload");   // Must run BEFORE emitPageDwell (which resets pageEnteredAt)
       emitPageDwell("unload");
       void flushQueue(true);
+      void flushPageViews(true);
     });
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
+        emitPageView("hidden"); // Must run BEFORE emitPageDwell (which resets pageEnteredAt)
         emitPageDwell("hidden");
         void flushQueue(true);
+        void flushPageViews(true);
       } else if (document.visibilityState === "visible") {
         pageEnteredAt = Date.now();
+        capturePageEntry();
       }
     });
   }
@@ -302,10 +315,12 @@
     }
 
     markInteractionActivity("route_change");
+    emitPageView("route_change");   // Must run BEFORE emitPageDwell (which resets pageEnteredAt)
     emitPageDwell("route_change");
     currentPageUrl = nextPage;
     pageEnteredAt = Date.now();
     reachedScrollDepths = new Set();
+    capturePageEntry();
 
     enqueueEvent(
       buildEvent("page_view", {
@@ -474,6 +489,111 @@
     return `${config.supabaseUrl.replace(/\/+$/, "")}/rest/v1/analytics_events`;
   }
 
+  function getPageViewsEndpoint() {
+    return `${config.supabaseUrl.replace(/\/+$/, "")}/rest/v1/page_views`;
+  }
+
+  // ── Page Views collection helpers ──
+
+  function capturePageEntry() {
+    currentPageEntryUtm = parseUtmParams();
+    currentPageReferrer = document.referrer || "";
+  }
+
+  function emitPageView(reason) {
+    const now = Date.now();
+    const durationMs = Math.max(0, now - pageEnteredAt);
+    if (durationMs < 250) {
+      return;
+    }
+    const durationSeconds = Math.round((durationMs / 1000) * 100) / 100;
+
+    const record = {
+      session_id: sessionId || "",
+      page_url: currentPageUrl,
+      referrer: currentPageReferrer || "",
+      utm_source: currentPageEntryUtm.utm_source || null,
+      utm_medium: currentPageEntryUtm.utm_medium || null,
+      utm_campaign: currentPageEntryUtm.utm_campaign || null,
+      device_type: detectDeviceType(),
+      browser: detectBrowser(),
+      screen_width: window.screen ? window.screen.width : null,
+      duration_seconds: durationSeconds,
+    };
+
+    pageViewsQueue.push(record);
+    if (pageViewsQueue.length > 500) {
+      pageViewsQueue = pageViewsQueue.slice(pageViewsQueue.length - 500);
+    }
+  }
+
+  async function flushPageViews(keepalive) {
+    if (pageViewsFlushInFlight || pageViewsQueue.length === 0 || !isConfigured()) {
+      return;
+    }
+
+    pageViewsFlushInFlight = true;
+    const payload = pageViewsQueue.slice();
+    pageViewsQueue = [];
+
+    try {
+      const response = await fetch(getPageViewsEndpoint(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: config.supabaseAnonKey,
+          Authorization: `Bearer ${config.supabaseAnonKey}`,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(payload),
+        keepalive: Boolean(keepalive),
+      });
+      if (!response.ok) {
+        pageViewsQueue = payload.concat(pageViewsQueue).slice(0, 500);
+      }
+    } catch (error) {
+      pageViewsQueue = payload.concat(pageViewsQueue).slice(0, 500);
+    } finally {
+      pageViewsFlushInFlight = false;
+    }
+  }
+
+  function parseUtmParams() {
+    const params = {};
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const utmKeys = ["utm_source", "utm_medium", "utm_campaign"];
+      utmKeys.forEach(function (key) {
+        const val = sp.get(key);
+        if (val) {
+          params[key] = sanitizeText(val, 200);
+        }
+      });
+    } catch (_e) {
+      // URLSearchParams not supported
+    }
+    return params;
+  }
+
+  function detectBrowser() {
+    const ua = navigator.userAgent || "";
+    if (/Edg\//i.test(ua)) return "Edge";
+    if (/OPR\//i.test(ua) || /Opera/i.test(ua)) return "Opera";
+    if (/SamsungBrowser/i.test(ua)) return "Samsung";
+    if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) return "Chrome";
+    if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) return "Safari";
+    if (/Firefox/i.test(ua)) return "Firefox";
+    if (/MSIE|Trident/i.test(ua)) return "IE";
+    return "Other";
+  }
+
+  function detectDeviceType() {
+    const w = window.screen ? window.screen.width : window.innerWidth || 0;
+    if (w < 768) return "mobile";
+    if (w < 1024) return "tablet";
+    return "desktop";
+  }
+
   function markInteractionActivity(_reason) {
     interactionActivityTick += 1;
   }
@@ -548,7 +668,8 @@
     if (!url) {
       return false;
     }
-    return String(url).includes("/rest/v1/analytics_events");
+    const s = String(url);
+    return s.includes("/rest/v1/analytics_events") || s.includes("/rest/v1/page_views");
   }
 
   function isConfigured() {
