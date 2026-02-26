@@ -68,8 +68,11 @@ class AdminPostsScreen extends ConsumerWidget {
               ),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             itemCount: posts.length + 1,
             itemBuilder: (context, index) {
               if (index == posts.length) {
@@ -205,6 +208,8 @@ class AdminPostsScreen extends ConsumerWidget {
                 ),
               );
             },
+          ),
+            ),
           );
         },
         loading: () => Center(

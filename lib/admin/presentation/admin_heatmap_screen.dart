@@ -96,89 +96,167 @@ class _AdminHeatmapScreenState extends ConsumerState<AdminHeatmapScreen> {
                       .fold<double>(0.0, (sum, value) => sum + value) /
                   dwellEvents.length;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _FilterCard(
-                  dateFilter: dateFilter,
-                  selectedPage: selectedPage,
-                  pagesAsync: pagesAsync,
-                  onDateFilterChanged: (next) {
-                    ref.read(analyticsDateFilterProvider.notifier).state = next;
-                  },
-                  onPageChanged: (nextPage) {
-                    ref.read(analyticsSelectedPageProvider.notifier).state =
-                        nextPage;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _SummaryRow(
-                  cards: [
-                    _SummaryCardData(
-                      title: '클릭 이벤트',
-                      value: '${clickEvents.length}',
-                      subtitle: 'CTA / Rage / Dead 포함',
-                      icon: Icons.ads_click,
-                    ),
-                    _SummaryCardData(
-                      title: '세션 수',
-                      value: '${uniqueSessions.length}',
-                      subtitle: '고유 session_id 기준',
-                      icon: Icons.groups_outlined,
-                    ),
-                    _SummaryCardData(
-                      title: '평균 체류',
-                      value: _formatDurationMs(averageDwellMs),
-                      subtitle: 'page_dwell 평균',
-                      icon: Icons.timer_outlined,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _SectionCard(
-                  title: '페이지 클릭 히트맵',
-                  subtitle: '클릭 밀집도 시각화 (canvas)',
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: ColoredBox(
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.35),
-                        child: CustomPaint(
-                          painter: _HeatmapPainter(
-                            events: clickEvents,
-                            theme: theme,
-                          ),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final wide = constraints.maxWidth > 720;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _FilterCard(
+                          dateFilter: dateFilter,
+                          selectedPage: selectedPage,
+                          pagesAsync: pagesAsync,
+                          onDateFilterChanged: (next) {
+                            ref.read(analyticsDateFilterProvider.notifier).state = next;
+                          },
+                          onPageChanged: (nextPage) {
+                            ref.read(analyticsSelectedPageProvider.notifier).state =
+                                nextPage;
+                          },
                         ),
-                      ),
-                    ),
-                  ),
+                        const SizedBox(height: 14),
+                        _SummaryRow(cards: [
+                          _SummaryCardData(
+                            title: '클릭 이벤트',
+                            value: '${clickEvents.length}',
+                            subtitle: 'CTA / Rage / Dead 포함',
+                            icon: Icons.ads_click,
+                          ),
+                          _SummaryCardData(
+                            title: '세션 수',
+                            value: '${uniqueSessions.length}',
+                            subtitle: '고유 session_id 기준',
+                            icon: Icons.groups_outlined,
+                          ),
+                          _SummaryCardData(
+                            title: '평균 체류',
+                            value: _formatDurationMs(averageDwellMs),
+                            subtitle: 'page_dwell 평균',
+                            icon: Icons.timer_outlined,
+                          ),
+                        ]),
+                        const SizedBox(height: 14),
+                        // Wide: heatmap + scroll depth side by side
+                        if (wide) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: _SectionCard(
+                                  title: '페이지 클릭 히트맵',
+                                  subtitle: '클릭 밀집도 시각화 (canvas)',
+                                  child: AspectRatio(
+                                    aspectRatio: 16 / 9,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: ColoredBox(
+                                        color: theme.colorScheme.surfaceContainerHighest
+                                            .withValues(alpha: 0.35),
+                                        child: CustomPaint(
+                                          painter: _HeatmapPainter(
+                                            events: clickEvents,
+                                            theme: theme,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                flex: 2,
+                                child: _SectionCard(
+                                  title: '스크롤 깊이 분포',
+                                  subtitle: '25/50/75/100% 도달 비율',
+                                  child: _ScrollDepthChart(
+                                    events: events,
+                                    totalSessions: math.max(uniqueSessions.length, 1),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          _SectionCard(
+                            title: '페이지 클릭 히트맵',
+                            subtitle: '클릭 밀집도 시각화 (canvas)',
+                            child: AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: ColoredBox(
+                                  color: theme.colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.35),
+                                  child: CustomPaint(
+                                    painter: _HeatmapPainter(
+                                      events: clickEvents,
+                                      theme: theme,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          _SectionCard(
+                            title: '스크롤 깊이 분포',
+                            subtitle: '25/50/75/100% 도달 비율',
+                            child: _ScrollDepthChart(
+                              events: events,
+                              totalSessions: math.max(uniqueSessions.length, 1),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 14),
+                        // Wide: rage click + session replay side by side
+                        if (wide) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _SectionCard(
+                                  title: 'Rage Click 발생 지점',
+                                  subtitle: '500ms 내 동일 위치 3회 이상 클릭',
+                                  child: _RageClickList(events: rageEvents),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: _SectionCard(
+                                  title: '세션 리플레이',
+                                  subtitle: 'session_id 기준 이벤트 재생',
+                                  child: _buildSessionReplay(events),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          _SectionCard(
+                            title: 'Rage Click 발생 지점',
+                            subtitle: '500ms 내 동일 위치 3회 이상 클릭',
+                            child: _RageClickList(events: rageEvents),
+                          ),
+                          const SizedBox(height: 14),
+                          _SectionCard(
+                            title: '세션 리플레이',
+                            subtitle: 'session_id 기준 이벤트 재생',
+                            child: _buildSessionReplay(events),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                      ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-                _SectionCard(
-                  title: '스크롤 깊이 분포',
-                  subtitle: '25/50/75/100% 도달 비율',
-                  child: _ScrollDepthChart(
-                    events: events,
-                    totalSessions: math.max(uniqueSessions.length, 1),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _SectionCard(
-                  title: 'Rage Click 발생 지점',
-                  subtitle: '500ms 내 동일 위치 3회 이상 클릭',
-                  child: _RageClickList(events: rageEvents),
-                ),
-                const SizedBox(height: 16),
-                _SectionCard(
-                  title: '세션 리플레이',
-                  subtitle: 'session_id 기준 이벤트 재생',
-                  child: _buildSessionReplay(events),
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -468,50 +546,59 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: cards
-          .map(
-            (card) => SizedBox(
-              width: 280,
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      CircleAvatar(radius: 22, child: Icon(card.icon)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              card.title,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              card.value,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              card.subtitle,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth > 600;
+        if (wide) {
+          return Row(
+            children: [
+              for (int i = 0; i < cards.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                Expanded(child: _buildCard(context, cards[i])),
+              ],
+            ],
+          );
+        }
+        return Column(
+          children: [
+            for (int i = 0; i < cards.length; i++) ...[
+              if (i > 0) const SizedBox(height: 10),
+              _buildCard(context, cards[i]),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCard(BuildContext context, _SummaryCardData card) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            CircleAvatar(radius: 20, child: Icon(card.icon, size: 20)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(card.title, style: Theme.of(context).textTheme.labelLarge),
+                  const SizedBox(height: 2),
+                  Text(
+                    card.value,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                ),
+                  Text(card.subtitle, style: Theme.of(context).textTheme.bodySmall),
+                ],
               ),
             ),
-          )
-          .toList(),
+          ],
+        ),
+      ),
     );
   }
 }

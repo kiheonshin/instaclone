@@ -51,8 +51,11 @@ class AdminUsersScreen extends ConsumerWidget {
               ),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
@@ -83,6 +86,8 @@ class AdminUsersScreen extends ConsumerWidget {
                 ),
               );
             },
+          ),
+            ),
           );
         },
         loading: () => Center(

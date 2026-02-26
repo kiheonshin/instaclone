@@ -98,58 +98,94 @@ class AdminAnalyticsScreen extends ConsumerWidget {
           ref.invalidate(hourlyDistributionProvider);
           ref.invalidate(topPagesByDurationProvider);
         },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Summary Cards ──
-              _SummaryCardsSection(),
-              const SizedBox(height: 24),
-
-              // ── Daily Visitor Trend (Line Chart) ──
-              _SectionTitle(title: '일별 방문자 추이', subtitle: '최근 30일'),
-              const SizedBox(height: 12),
-              _DailyTrendChart(),
-              const SizedBox(height: 32),
-
-              // ── Two-column: Referrer + Device ──
-              LayoutBuilder(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth > 700) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _ReferrerPieSection()),
-                        const SizedBox(width: 16),
-                        Expanded(child: _DeviceDonutSection()),
-                      ],
-                    );
-                  }
+                  final wide = constraints.maxWidth > 720;
+
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _ReferrerPieSection(),
+                      // ── Summary Cards ──
+                      _SummaryCardsSection(),
+                      const SizedBox(height: 20),
+
+                      // ── Wide: line chart + hourly side-by-side ──
+                      if (wide) ...[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _SectionTitle(title: '일별 방문자 추이', subtitle: '최근 30일'),
+                                  const SizedBox(height: 8),
+                                  _DailyTrendChart(),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _SectionTitle(title: '시간대별 방문 분포', subtitle: '24시간'),
+                                  const SizedBox(height: 8),
+                                  _HourlyBarChart(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        _SectionTitle(title: '일별 방문자 추이', subtitle: '최근 30일'),
+                        const SizedBox(height: 8),
+                        _DailyTrendChart(),
+                        const SizedBox(height: 20),
+                        _SectionTitle(title: '시간대별 방문 분포', subtitle: '24시간'),
+                        const SizedBox(height: 8),
+                        _HourlyBarChart(),
+                      ],
+                      const SizedBox(height: 20),
+
+                      // ── Two-column: Referrer + Device ──
+                      if (wide)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _ReferrerPieSection()),
+                            const SizedBox(width: 14),
+                            Expanded(child: _DeviceDonutSection()),
+                          ],
+                        )
+                      else
+                        Column(
+                          children: [
+                            _ReferrerPieSection(),
+                            const SizedBox(height: 20),
+                            _DeviceDonutSection(),
+                          ],
+                        ),
+                      const SizedBox(height: 20),
+
+                      // ── Top Pages by Duration ──
+                      _SectionTitle(title: '페이지별 체류시간 TOP 5'),
+                      const SizedBox(height: 8),
+                      _TopPagesBarChart(),
                       const SizedBox(height: 24),
-                      _DeviceDonutSection(),
                     ],
                   );
                 },
               ),
-              const SizedBox(height: 32),
-
-              // ── Hourly Distribution (Bar Chart) ──
-              _SectionTitle(title: '시간대별 방문 분포', subtitle: '24시간'),
-              const SizedBox(height: 12),
-              _HourlyBarChart(),
-              const SizedBox(height: 32),
-
-              // ── Top Pages by Duration (Horizontal Bar) ──
-              _SectionTitle(title: '페이지별 체류시간 TOP 5'),
-              const SizedBox(height: 12),
-              _TopPagesBarChart(),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ),
       ),
@@ -196,7 +232,7 @@ class _SummaryCardsSection extends ConsumerWidget {
 
     return summaryAsync.when(
       loading: () => const SizedBox(
-        height: 100,
+        height: 80,
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => _ErrorCard(message: '요약 데이터 로드 실패: $e'),
@@ -210,14 +246,16 @@ class _SummaryCardsSection extends ConsumerWidget {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 800 ? 4 : 2;
+            final w = constraints.maxWidth;
+            final crossAxisCount = w > 800 ? 4 : w > 480 ? 2 : 1;
+            final aspectRatio = w > 800 ? 2.0 : w > 480 ? 2.2 : 3.5;
             return GridView.count(
               crossAxisCount: crossAxisCount,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.8,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: aspectRatio,
               children: [
                 _SummaryCard(
                   icon: Icons.people_outline,
@@ -286,17 +324,16 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: iconColor),
+                Icon(icon, size: 18, color: iconColor),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(label,
@@ -306,17 +343,17 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               value,
-              style: theme.textTheme.headlineSmall?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             if (trailing != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               trailing!,
             ],
           ],
@@ -355,12 +392,11 @@ class _DailyTrendChart extends ConsumerWidget {
         }
 
         return Card(
-          elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 20, 12),
+            padding: const EdgeInsets.fromLTRB(12, 16, 16, 10),
             child: SizedBox(
-              height: 220,
+              height: 200,
               child: LineChart(
                 LineChartData(
                   minY: 0,
@@ -543,7 +579,7 @@ class _PieChartCard extends StatelessWidget {
       sections.add(PieChartSectionData(
         value: entry.value.toDouble(),
         color: color,
-        radius: showCenterHole ? 45 : 55,
+        radius: showCenterHole ? 40 : 48,
         title: pct >= 5 ? '${pct.toStringAsFixed(0)}%' : '',
         titleStyle: const TextStyle(
           fontSize: 11,
@@ -554,18 +590,17 @@ class _PieChartCard extends StatelessWidget {
     }
 
     return Card(
-      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           children: [
             SizedBox(
-              height: 170,
+              height: 150,
               child: PieChart(
                 PieChartData(
                   sections: sections,
-                  centerSpaceRadius: showCenterHole ? 36 : 0,
+                  centerSpaceRadius: showCenterHole ? 30 : 0,
                   sectionsSpace: 2,
                 ),
               ),
@@ -661,12 +696,11 @@ class _HourlyBarChart extends ConsumerWidget {
         }
 
         return Card(
-          elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 20, 16, 12),
+            padding: const EdgeInsets.fromLTRB(10, 16, 14, 10),
             child: SizedBox(
-              height: 220,
+              height: 200,
               child: BarChart(
                 BarChartData(
                   maxY: adjustedMaxY,
@@ -780,12 +814,11 @@ class _TopPagesBarChart extends ConsumerWidget {
         }
 
         return Card(
-          elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 20, 16, 12),
+            padding: const EdgeInsets.fromLTRB(10, 16, 14, 10),
             child: SizedBox(
-              height: math.max(180, pages.length * 50.0),
+              height: math.max(160, pages.length * 44.0),
               child: RotatedBox(
                 quarterTurns: 1,
                 child: BarChart(
