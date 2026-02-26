@@ -49,26 +49,28 @@ class AdminAnalyticsScreen extends ConsumerWidget {
           onPressed: () => context.go('/admin'),
         ),
         actions: [
-          // Date filter chips
+          // Date filter chips – explicit colors for gradient AppBar
           ...AnalyticsDateFilter.values.map((f) {
             final selected = f == dateFilter;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: ChoiceChip(
-                label: Text(
-                  f.label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: selected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onPrimary.withOpacity(0.7),
-                  ),
+                label: Text(f.label),
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                  color: Colors.white,
                 ),
                 selected: selected,
-                selectedColor: Colors.white24,
-                backgroundColor: Colors.transparent,
+                showCheckmark: false,
+                color: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Colors.white.withOpacity(0.25);
+                  }
+                  return Colors.white.withOpacity(0.08);
+                }),
                 side: BorderSide(
-                  color: theme.colorScheme.onPrimary.withOpacity(0.3),
+                  color: Colors.white.withOpacity(selected ? 0.6 : 0.3),
                 ),
                 onSelected: (_) {
                   ref.read(visitorDateFilterProvider.notifier).state = f;
